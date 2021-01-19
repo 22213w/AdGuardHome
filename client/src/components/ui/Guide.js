@@ -11,15 +11,17 @@ const MOBILE_CONFIG_LINKS = {
     DOT: '/apple/dot.mobileconfig',
     DOH: '/apple/doh.mobileconfig',
 };
+
+/* FIXME: find out `client_id` */
 const renderMobileconfigInfo = ({ label, components, server_name }) => <li key={label}>
     <Trans components={components}>{label}</Trans>
     <ul>
         <li>
-            <a href={getPathWithQueryString(MOBILE_CONFIG_LINKS.DOT, { host: server_name })}
+            <a href={getPathWithQueryString(MOBILE_CONFIG_LINKS.DOT, { host: server_name, client_id: 'client_id' })}
                download>{i18next.t('download_mobileconfig_dot')}</a>
         </li>
         <li>
-            <a href={getPathWithQueryString(MOBILE_CONFIG_LINKS.DOH, { host: server_name })}
+            <a href={getPathWithQueryString(MOBILE_CONFIG_LINKS.DOH, { host: server_name, client_id: 'client_id' })}
                download>{i18next.t('download_mobileconfig_doh')}</a>
         </li>
     </ul>

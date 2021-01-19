@@ -1772,13 +1772,21 @@
         'answer_dnssec':
           'type': 'boolean'
         'client':
-          'type': 'string'
+          'description': >
+            The client's IP address.
           'example': '192.168.0.1'
+          'type': 'string'
+        'client_id':
+          'description': >
+            The client ID, if provided in DOH, DOQ, or DOT.
+          'example': 'cli123'
+          'type': 'string'
         'client_proto':
           'enum':
           - 'dot'
           - 'doh'
           - 'doq'
+          - 'dnscrypt'
           - ''
         'elapsedMs':
           'type': 'string'
@@ -2081,7 +2089,7 @@
           'type': 'string'
     'Client':
       'type': 'object'
-      'description': 'Client information'
+      'description': 'Client information.'
       'properties':
         'name':
           'type': 'string'
@@ -2089,7 +2097,7 @@
           'example': 'localhost'
         'ids':
           'type': 'array'
-          'description': 'IP, CIDR or MAC address'
+          'description': 'IP, CIDR, MAC, or client ID.'
           'items':
             'type': 'string'
         'use_global_settings':
@@ -2178,6 +2186,7 @@
         '1.2.3.4': 'test'
     'ClientFindSubEntry':
       'type': 'object'
+      'description': 'Client information.'
       'properties':
         'name':
           'type': 'string'
@@ -2185,7 +2194,7 @@
           'example': 'localhost'
         'ids':
           'type': 'array'
-          'description': 'IP, CIDR or MAC address'
+          'description': 'IP, CIDR, MAC, or client ID.'
           'items':
             'type': 'string'
         'use_global_settings':

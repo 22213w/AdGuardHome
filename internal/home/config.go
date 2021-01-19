@@ -1,10 +1,12 @@
 package home
 
 import (
+	"errors"
 	"io/ioutil"
 	"net"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/AdguardTeam/AdGuardHome/internal/dhcpd"
@@ -118,6 +120,18 @@ type tlsConfigSettings struct {
 	dnsforward.TLSConfig `yaml:",inline" json:",inline"`
 }
 
+// hostname returns the hostname from the server name of the configuration.
+//
+// TODO(a.garipov): Think of a better way to do this.  Perhaps, caching on
+// change?
+func (s *tlsConfigSettings) hostname() (h string) {
+	if s == nil {
+		return ""
+	}
+
+	return strings.TrimPrefix(s.ServerName, "*.")
+}
+
 // initialize to default values, will be changed later when reading config or parsing command line
 var config = configuration{
 	BindPort:     3000,
@@ -188,7 +202,7 @@ func initConfig() {
 func (c *configuration) getConfigFilename() string {
 	configFile, err := filepath.EvalSymlinks(Context.configFilename)
 	if err != nil {
-		if !os.IsNotExist(err) {
+		if !errors.Is(err, os.ErrNotExist) {
 			log.Error("unexpected error while config file path evaluation: %s", err)
 		}
 		configFile = Context.configFilename

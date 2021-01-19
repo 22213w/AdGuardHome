@@ -158,7 +158,7 @@ func (clients *clientsContainer) handleAddClient(w http.ResponseWriter, r *http.
 	}
 
 	c := jsonToClient(cj)
-	ok, err := clients.Add(*c)
+	ok, err := clients.Add(c)
 	if err != nil {
 		httpError(w, http.StatusBadRequest, "%s", err)
 		return
@@ -216,7 +216,7 @@ func (clients *clientsContainer) handleUpdateClient(w http.ResponseWriter, r *ht
 	}
 
 	c := jsonToClient(dj.Data)
-	err = clients.Update(dj.Name, *c)
+	err = clients.Update(dj.Name, c)
 	if err != nil {
 		httpError(w, http.StatusBadRequest, "%s", err)
 		return
@@ -237,16 +237,16 @@ func (clients *clientsContainer) handleFindClient(w http.ResponseWriter, r *http
 		}
 
 		el := map[string]interface{}{}
-		c, ok := clients.Find(ip)
+		c, ok := clients.Find(ipStr)
 		var cj clientJSON
 		if !ok {
 			var found bool
-			cj, found = clients.findTemporary(ip)
+			cj, found = clients.findTemporary(ip, ipStr)
 			if !found {
 				continue
 			}
 		} else {
-			cj = clientToJSON(&c)
+			cj = clientToJSON(c)
 			cj.Disallowed, cj.DisallowedRule = clients.dnsServer.IsBlockedIP(ip)
 		}
 
@@ -269,9 +269,8 @@ func (clients *clientsContainer) handleFindClient(w http.ResponseWriter, r *http
 
 // findTemporary looks up the IP in temporary storages, like autohosts or
 // blocklists.
-func (clients *clientsContainer) findTemporary(ip net.IP) (cj clientJSON, found bool) {
-	ipStr := ip.String()
-	ch, ok := clients.FindAutoClient(ip)
+func (clients *clientsContainer) findTemporary(ip net.IP, ipStr string) (cj clientJSON, found bool) {
+	ch, ok := clients.FindAutoClient(ipStr)
 	if !ok {
 		// It is still possible that the IP used to be in the runtime
 		// clients list, but then the server was reloaded.  So, check

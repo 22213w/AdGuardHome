@@ -38,6 +38,7 @@ type RequestFilteringSettings struct {
 	ClientName string
 	ClientIP   net.IP
 	ClientTags []string
+	ClientIDs  []string
 
 	ServicesRules []ServiceEntry
 }

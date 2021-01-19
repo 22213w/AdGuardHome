@@ -13,7 +13,7 @@ import (
 )
 
 // Write Stats data and logs
-func processQueryLogsAndStats(ctx *dnsContext) int {
+func processQueryLogsAndStats(ctx *dnsContext) (rc resultCode) {
 	elapsed := time.Since(ctx.startTime)
 	s := ctx.srv
 	d := ctx.proxyCtx
@@ -37,6 +37,7 @@ func processQueryLogsAndStats(ctx *dnsContext) int {
 			Result:     ctx.result,
 			Elapsed:    elapsed,
 			ClientIP:   IPFromAddr(d.Addr),
+			ClientID:   ctx.clientID,
 		}
 
 		switch d.Proto {
@@ -46,6 +47,8 @@ func processQueryLogsAndStats(ctx *dnsContext) int {
 			p.ClientProto = querylog.ClientProtoDOQ
 		case proxy.ProtoTLS:
 			p.ClientProto = querylog.ClientProtoDOT
+		case proxy.ProtoDNSCrypt:
+			p.ClientProto = querylog.ClientProtoDNSCrypt
 		default:
 			// Consider this a plain DNS-over-UDP or DNS-over-TCL
 			// request.
@@ -60,7 +63,7 @@ func processQueryLogsAndStats(ctx *dnsContext) int {
 	s.updateStats(d, elapsed, *ctx.result)
 	s.RUnlock()
 
-	return resultDone
+	return resultCodeSuccess
 }
 
 func (s *Server) updateStats(d *proxy.DNSContext, elapsed time.Duration, res dnsfilter.Result) {

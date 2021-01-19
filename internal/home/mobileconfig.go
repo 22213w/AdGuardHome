@@ -85,7 +85,7 @@ func getMobileConfig(d dnsSettings) ([]byte, error) {
 func handleMobileConfig(w http.ResponseWriter, r *http.Request, dnsp string) {
 	host := r.URL.Query().Get("host")
 	if host == "" {
-		host = Context.tls.conf.ServerName
+		host = Context.tls.conf.hostname()
 	}
 
 	if host == "" {

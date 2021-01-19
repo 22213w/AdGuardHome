@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -577,10 +578,11 @@ func printHTTPAddresses(proto string) {
 
 	var hostStr string
 	if proto == "https" && tlsConf.ServerName != "" {
+		hostname := tlsConf.hostname()
 		if tlsConf.PortHTTPS == 443 {
-			log.Printf("Go to https://%s", tlsConf.ServerName)
+			log.Printf("Go to https://%s", hostname)
 		} else {
-			log.Printf("Go to https://%s:%s", tlsConf.ServerName, port)
+			log.Printf("Go to https://%s:%s", hostname, port)
 		}
 	} else if config.BindHost.IsUnspecified() {
 		log.Println("AdGuard Home is available on the following addresses:")
@@ -622,7 +624,7 @@ func detectFirstRun() bool {
 		configfile = filepath.Join(Context.workDir, Context.configFilename)
 	}
 	_, err := os.Stat(configfile)
-	return os.IsNotExist(err)
+	return errors.Is(err, os.ErrNotExist)
 }
 
 // Connect to a remote server resolving hostname using our own DNS server
