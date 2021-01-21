@@ -313,7 +313,6 @@ func applyAdditionalFiltering(clientAddr net.IP, clientID string, setts *dnsfilt
 
 	setts.ClientName = c.Name
 	setts.ClientTags = c.Tags
-	setts.ClientIDs = c.IDs
 
 	if !c.UseOwnSettings {
 		return

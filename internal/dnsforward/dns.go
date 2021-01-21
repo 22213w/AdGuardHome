@@ -242,7 +242,7 @@ func clientIDFromClientServerName(hostSrvName, cliSrvName string) (clientID stri
 		return "", fmt.Errorf("bad host server name %q", hostSrvName)
 	}
 
-	// First, check a simple host-to-host match.
+	// Firstly, check a simple host-to-host match.
 	if hostSrvName[0] != '*' && hostSrvName[1] != '.' {
 		if hostSrvName != cliSrvName {
 			return "", fmt.Errorf("client server name %q doesn't match host server name %q", cliSrvName, hostSrvName)
@@ -251,8 +251,8 @@ func clientIDFromClientServerName(hostSrvName, cliSrvName string) (clientID stri
 		return "", nil
 	}
 
-	// First, check for a simple "example.com" with "*.example.com" match.
-	// If matched, we have no client ID.
+	// Secondly, check for a simple "example.com" with "*.example.com"
+	// match.  If matched, we have no client ID.
 	if cliSrvName == hostSrvName[2:] {
 		return "", nil
 	}
