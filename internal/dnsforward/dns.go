@@ -233,10 +233,14 @@ func processInternalHosts(ctx *dnsContext) (rc resultCode) {
 	return resultCodeSuccess
 }
 
+const maxDomainPartLen = 64
+
 // ValidateClientID returns an error if clientID is not a valid client ID.
-//
-// TODO(a.garipov): Add maximum length validation?
 func ValidateClientID(clientID string) (err error) {
+	if len(clientID) > maxDomainPartLen {
+		return fmt.Errorf("client id %q is too long, max: %d", clientID, maxDomainPartLen)
+	}
+
 	for i, r := range clientID {
 		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || r == '-' {
 			continue

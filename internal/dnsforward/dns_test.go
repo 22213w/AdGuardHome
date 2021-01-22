@@ -92,6 +92,14 @@ func TestProcessClientID(t *testing.T) {
 		wantClientID: "",
 		wantErrMsg:   `client id check: invalid client id: invalid char '!' at index 0 in client id "!!!"`,
 		wantRes:      resultCodeError,
+	}, {
+		name:         "tls_client_id_too_long",
+		proto:        proxy.ProtoTLS,
+		hostSrvName:  "*.example.com",
+		cliSrvName:   "abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789.example.com",
+		wantClientID: "",
+		wantErrMsg:   `client id check: invalid client id: client id "abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789" is too long, max: 64`,
+		wantRes:      resultCodeError,
 	}}
 
 	for _, tc := range testCases {
