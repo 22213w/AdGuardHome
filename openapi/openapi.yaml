@@ -1104,9 +1104,19 @@
           `tls.server_name` from the configuration file is used.  If
           `tls.server_name` is not set, the API returns an error with a 500
           status.
+
+          Can be a wildcard host, for example `"*.example.org"`.
         'example': 'example.org'
         'in': 'query'
         'name': 'host'
+        'schema':
+          'type': 'string'
+      - 'description': >
+          Client ID.  This can only be set it the host is a wildcard, for
+          example `"*.example.org"`.
+        'example': 'client-1'
+        'in': 'query'
+        'name': 'client_id'
         'schema':
           'type': 'string'
       'responses':
@@ -1131,9 +1141,19 @@
           `tls.server_name` from the configuration file is used.  If
           `tls.server_name` is not set, the API returns an error with a 500
           status.
+
+          Can be a wildcard host, for example `"*.example.org"`.
         'example': 'example.org'
         'in': 'query'
         'name': 'host'
+        'schema':
+          'type': 'string'
+      - 'description': >
+          Client ID.  This can only be set it the host is a wildcard, for
+          example `"*.example.org"`.
+        'example': 'client-1'
+        'in': 'query'
+        'name': 'client_id'
         'schema':
           'type': 'string'
       'responses':

@@ -4,7 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
+	"path"
+	"strings"
 
+	"github.com/AdguardTeam/AdGuardHome/internal/dnsforward"
 	"github.com/AdguardTeam/golibs/log"
 	uuid "github.com/satori/go.uuid"
 	"howett.net/plist"
@@ -14,6 +18,7 @@ type dnsSettings struct {
 	DNSProtocol string
 	ServerURL   string `plist:",omitempty"`
 	ServerName  string `plist:",omitempty"`
+	clientID    string
 }
 
 type payloadContent struct {
@@ -23,19 +28,19 @@ type payloadContent struct {
 	PayloadIdentifier  string
 	PayloadType        string
 	PayloadUUID        string
-	PayloadVersion     int
 	DNSSettings        dnsSettings
+	PayloadVersion     int
 }
 
 type mobileConfig struct {
-	PayloadContent           []payloadContent
 	PayloadDescription       string
 	PayloadDisplayName       string
 	PayloadIdentifier        string
-	PayloadRemovalDisallowed bool
 	PayloadType              string
 	PayloadUUID              string
+	PayloadContent           []payloadContent
 	PayloadVersion           int
+	PayloadRemovalDisallowed bool
 }
 
 func genUUIDv4() string {
@@ -48,22 +53,38 @@ const (
 )
 
 func getMobileConfig(d dnsSettings) ([]byte, error) {
-	var name string
+	srvName := strings.TrimPrefix(d.ServerName, "*.")
+
+	var dspName string
 	switch d.DNSProtocol {
 	case dnsProtoHTTPS:
-		name = fmt.Sprintf("%s DoH", d.ServerName)
-		d.ServerURL = fmt.Sprintf("https://%s/dns-query", d.ServerName)
+		dspName = fmt.Sprintf("%s DoH", srvName)
+
+		d.ServerName = srvName
+
+		u := &url.URL{
+			Scheme: "https",
+			Host:   srvName,
+			Path:   "/dns-query",
+		}
+		if d.clientID != "" {
+			u.Path = path.Join(u.Path, d.clientID)
+		}
+		d.ServerURL = u.String()
 	case dnsProtoTLS:
-		name = fmt.Sprintf("%s DoT", d.ServerName)
+		dspName = fmt.Sprintf("%s DoT", srvName)
+		if d.clientID != "" {
+			d.ServerName = d.clientID + "." + srvName
+		}
 	default:
 		return nil, fmt.Errorf("bad dns protocol %q", d.DNSProtocol)
 	}
 
 	data := mobileConfig{
 		PayloadContent: []payloadContent{{
-			Name:               name,
+			Name:               dspName,
 			PayloadDescription: "Configures device to use AdGuard Home",
-			PayloadDisplayName: name,
+			PayloadDisplayName: dspName,
 			PayloadIdentifier:  fmt.Sprintf("com.apple.dnsSettings.managed.%s", genUUIDv4()),
 			PayloadType:        "com.apple.dnsSettings.managed",
 			PayloadUUID:        genUUIDv4(),
@@ -71,7 +92,7 @@ func getMobileConfig(d dnsSettings) ([]byte, error) {
 			DNSSettings:        d,
 		}},
 		PayloadDescription:       "Adds AdGuard Home to Big Sur and iOS 14 or newer systems",
-		PayloadDisplayName:       name,
+		PayloadDisplayName:       dspName,
 		PayloadIdentifier:        genUUIDv4(),
 		PayloadRemovalDisallowed: false,
 		PayloadType:              "Configuration",
@@ -82,17 +103,28 @@ func getMobileConfig(d dnsSettings) ([]byte, error) {
 	return plist.MarshalIndent(data, plist.XMLFormat, "\t")
 }
 
+func canUseClientID(srvName, clientID string) (ok bool) {
+	if clientID == "" {
+		return true
+	}
+
+	return strings.HasPrefix(srvName, "*.")
+}
+
 func handleMobileConfig(w http.ResponseWriter, r *http.Request, dnsp string) {
-	host := r.URL.Query().Get("host")
+	var err error
+
+	q := r.URL.Query()
+	host := q.Get("host")
 	if host == "" {
-		host = Context.tls.conf.hostname()
+		host = Context.tls.conf.ServerName
 	}
 
 	if host == "" {
 		w.WriteHeader(http.StatusInternalServerError)
 
 		const msg = "no host in query parameters and no server_name"
-		err := json.NewEncoder(w).Encode(&jsonError{
+		err = json.NewEncoder(w).Encode(&jsonError{
 			Message: msg,
 		})
 		if err != nil {
@@ -102,9 +134,39 @@ func handleMobileConfig(w http.ResponseWriter, r *http.Request, dnsp string) {
 		return
 	}
 
+	clientID := q.Get("client_id")
+	err = dnsforward.ValidateClientID(clientID)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+
+		err = json.NewEncoder(w).Encode(&jsonError{
+			Message: err.Error(),
+		})
+		if err != nil {
+			log.Debug("writing 400 json response: %s", err)
+		}
+
+		return
+	}
+
+	if !canUseClientID(host, clientID) {
+		w.WriteHeader(http.StatusBadRequest)
+
+		msg := fmt.Sprintf("can't use client_id with server name %q", host)
+		err = json.NewEncoder(w).Encode(&jsonError{
+			Message: msg,
+		})
+		if err != nil {
+			log.Debug("writing 400 json response: %s", err)
+		}
+
+		return
+	}
+
 	d := dnsSettings{
 		DNSProtocol: dnsp,
 		ServerName:  host,
+		clientID:    clientID,
 	}
 
 	mobileconfig, err := getMobileConfig(d)
@@ -115,6 +177,7 @@ func handleMobileConfig(w http.ResponseWriter, r *http.Request, dnsp string) {
 	}
 
 	w.Header().Set("Content-Type", "application/xml")
+
 	_, _ = w.Write(mobileconfig)
 }
 
