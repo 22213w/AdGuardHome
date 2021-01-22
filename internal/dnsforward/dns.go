@@ -18,20 +18,34 @@ import (
 
 // To transfer information between modules
 type dnsContext struct {
-	srv                  *Server
-	proxyCtx             *proxy.DNSContext
-	setts                *dnsfilter.RequestFilteringSettings // filtering settings for this client
-	startTime            time.Time
-	result               *dnsfilter.Result
-	origResp             *dns.Msg // response received from upstream servers.  Set when response is modified by filtering
-	err                  error    // error returned from the module
-	clientID             string
-	origQuestion         dns.Question // question received from client.  Set when Rewrites are used.
-	protectionEnabled    bool         // filtering is enabled, dnsfilter object is ready
-	responseFromUpstream bool         // response is received from upstream servers
-	origReqDNSSEC        bool         // DNSSEC flag in the original request from user
+	srv      *Server
+	proxyCtx *proxy.DNSContext
+	// setts are the filtering settings for the client.
+	setts     *dnsfilter.RequestFilteringSettings
+	startTime time.Time
+	result    *dnsfilter.Result
+	// origResp is the response received from upstream.  It is set when the
+	// response is modified by filters.
+	origResp *dns.Msg
+	// err is the error returned from a processing function.
+	err error
+	// clientID is the clientID from DOH, DOQ, or DOT, if provided.
+	clientID string
+	// origQuestion is the question received from the client.  It is set
+	// when the request is modified by rewrites.
+	origQuestion dns.Question
+	// protectionEnabled shows if the filtering is enabled, and if the
+	// server's DNS filter is ready.
+	protectionEnabled bool
+	// responseFromUpstream shows if the response is received from the
+	// upstream servers.
+	responseFromUpstream bool
+	// origReqDNSSEC shows if the DNSSEC flag in the original request from
+	// the client is set.
+	origReqDNSSEC bool
 }
 
+// resultCode is the result of a request processing function.
 type resultCode int
 
 const (

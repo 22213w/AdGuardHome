@@ -110,7 +110,8 @@ type TLSConfig struct {
 	CertificateChainData []byte `yaml:"-" json:"-"`
 	PrivateKeyData       []byte `yaml:"-" json:"-"`
 
-	// ServerName is the user-set server name for client ID checking.
+	// ServerName is the hostname of the server.  Currently, it is only
+	// being used for client ID checking.
 	ServerName string `yaml:"-" json:"-"`
 
 	cert tls.Certificate
