@@ -315,7 +315,7 @@ const renderContent = ({ title, list, getTitle }) => <div key={title} label={i18
 
 const Guide = ({ dnsAddresses }) => {
     const { t } = useTranslation();
-    const server_name = useSelector((state) => state.encryption.server_name);
+    const server_name = useSelector((state) => state.encryption?.server_name);
     const tlsAddress = dnsAddresses?.filter((item) => item.includes('tls://')) ?? '';
     const httpsAddress = dnsAddresses?.filter((item) => item.includes('https://')) ?? '';
     const showDnsPrivacyNotice = httpsAddress.length < 1 && tlsAddress.length < 1;

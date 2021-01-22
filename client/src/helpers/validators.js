@@ -9,7 +9,7 @@ import {
     R_URL_REQUIRES_PROTOCOL,
     STANDARD_WEB_PORT,
     UNSAFE_PORTS,
-    R_DOMAIN,
+    R_CLIENT_ID,
     R_SERVER_NAME,
 } from './constants';
 import { getLastIpv4Octet, isValidAbsolutePath } from './form';
@@ -73,7 +73,7 @@ export const validateClientId = (value) => {
             || R_MAC.test(formattedValue)
             || R_CIDR.test(formattedValue)
             || R_CIDR_IPV6.test(formattedValue)
-            || R_DOMAIN.test(formattedValue)
+            || R_CLIENT_ID.test(formattedValue)
     )) {
         return 'form_error_client_id_format';
     }

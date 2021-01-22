@@ -62,6 +62,7 @@ export const normalizeLogs = (logs) => logs.map((log) => {
         answer_dnssec,
         client,
         client_proto,
+        client_id,
         elapsedMs,
         question,
         reason,
@@ -99,6 +100,7 @@ export const normalizeLogs = (logs) => logs.map((log) => {
         reason,
         client,
         client_proto,
+        client_id,
         /* TODO 'filterId' and 'rule' are deprecated, will be removed in 0.106 */
         filterId,
         rule,
