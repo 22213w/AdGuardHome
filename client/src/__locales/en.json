@@ -388,7 +388,7 @@
     "client_edit": "Edit Client",
     "client_identifier": "Identifier",
     "ip_address": "IP address",
-    "client_identifier_desc": "Clients can be identified by the IP address, CIDR, MAC address or special client ID (can be used for DoT/DoH/DoQ). <0>Here</0> you can learn more about how to identify clients. Please note that using MAC as identifier is possible only if AdGuard Home is also a <1>DHCP server</1>",
+    "client_identifier_desc": "Clients can be identified by the IP address, CIDR, MAC address or a special client ID (can be used for DoT/DoH/DoQ). <0>Here</0> you can learn more about how to identify clients.",
     "form_enter_ip": "Enter IP",
     "form_enter_mac": "Enter MAC",
     "form_enter_id": "Enter identifier",

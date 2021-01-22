@@ -285,9 +285,6 @@ let Form = (props) => {
                                     <a href="https://github.com/AdguardTeam/AdGuardHome/wiki/Clients#idclient" key="0" target="_blank" rel="noopener noreferrer">
                                         link
                                     </a>,
-                                    <a href="#dhcp" key="1">
-                                        link
-                                    </a>,
                                 ]}
                             >
                                 client_identifier_desc
