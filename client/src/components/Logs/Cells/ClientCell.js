@@ -198,6 +198,7 @@ const ClientCell = ({
 
 ClientCell.propTypes = {
     client: propTypes.string.isRequired,
+    client_id: propTypes.string,
     domain: propTypes.string.isRequired,
     info: propTypes.oneOfType([
         propTypes.string,
